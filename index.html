@@ -1,64 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Google Search API</title>
+  <meta charset="UTF-8">
+  <title>Google Search API Tester</title>
+  <style>
+    body { font-family: monospace; background: #111; color: #0f0; padding: 20px; }
+    #log { white-space: pre-wrap; background: #000; border: 1px solid #0f0; padding: 10px; margin-top: 10px; }
+    input, button { padding: 10px; font-size: 1rem; margin-right: 10px; }
+  </style>
 </head>
 <body>
-  <h1>Google Search</h1>
-  <input type="text" id="queryInput" placeholder="Enter search query" />
-  <button id="searchBtn">Search</button>
-  <pre id="output"></pre>
+  <h1>Search Something:</h1>
+  <input type="text" id="searchInput" placeholder="Type anything..." />
+  <button onclick="runRequest()">Search</button>
+  <div id="log">Ready when you are, chief.</div>
 
   <script>
-    const searchBtn = document.getElementById('searchBtn');
-    const queryInput = document.getElementById('queryInput');
-    const output = document.getElementById('output');
+    function log(msg) {
+      const logDiv = document.getElementById("log");
+      logDiv.textContent += `\n${msg}`;
+    }
 
-    searchBtn.addEventListener('click', () => {
-      const query = queryInput.value.trim();
-      console.log('Search button clicked. Query:', query);
+    async function runRequest() {
+      const query = document.getElementById("searchInput").value.trim();
       if (!query) {
-        output.textContent = 'Please enter a search query.';
+        log("⚠️ You didn't type anything.");
         return;
       }
 
-      const url = 'https://google-search122.p.rapidapi.com/';
+      document.getElementById("log").textContent = "Sending request for: " + query;
+
+      const endpoint = 'https://google-search122.p.rapidapi.com/';
       const headers = {
         'Content-Type': 'application/json',
         'x-rapidapi-host': 'google-search122.p.rapidapi.com',
-        'x-rapidapi-key': 'f7e2ffa941msh8158f94506722bbp1b30f7jsnd8155d22d75f',
+        'x-rapidapi-key': 'f7e2ffa941msh8158f94506722bbp1b30f7jsnd8155d22d75f'
       };
-      const body = JSON.stringify({
-        actor: 'scraper.google.search',
+      const body = {
+        actor: "scraper.google.search",
         input: {
           q: query,
-          hl: 'en',
-          gl: 'us',
-        },
-      });
+          hl: "en",
+          gl: "us"
+        }
+      };
 
-      console.log('Sending request with body:', body);
-
-      fetch(url, {
-        method: 'POST',
-        headers,
-        body,
-      })
-        .then(response => {
-          console.log('Raw response:', response);
-          if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-          return response.json();
-        })
-        .then(data => {
-          console.log('API response:', data);
-          output.textContent = JSON.stringify(data, null, 2);
-        })
-        .catch(error => {
-          console.error('Fetch error:', error);
-          output.textContent = 'Error: ' + error.message;
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(body)
         });
-    });
+
+        log("\n✅ Response status: " + response.status);
+
+        const data = await response.json();
+        log("\n🎯 Response:\n" + JSON.stringify(data, null, 2));
+      } catch (error) {
+        log("\n❌ ERROR:\n" + error.toString());
+      }
+    }
   </script>
 </body>
 </html>
