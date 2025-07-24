@@ -1,210 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Altpris Search Engine</title>
   <style>
     body {
+      background-color: #0e0e0e;
       font-family: Arial, sans-serif;
+      color: white;
       margin: 0;
-      background-color: #f4f4f4;
-      overflow-y: auto;
-      display: flex;
+      padding: 0;
     }
-    #sidebar {
-      width: 250px;
-      background-color: #fff;
+    .container {
       padding: 20px;
-      border-right: 1px solid #ddd;
-      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    }
-    #bookmarks {
-      margin-top: 20px;
-    }
-    .bookmark {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 5px 0;
-    }
-    .bookmark a {
-      color: #007bff;
-      text-decoration: none;
-    }
-    .bookmark button {
-      background: none;
-      border: none;
-      color: red;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    #main {
-      flex: 1;
-      padding: 20px;
-    }
-    #search-box {
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      position: sticky;
-      top: 10px;
-      background: #f4f4f4;
-      z-index: 10;
-      padding-bottom: 10px;
     }
     input[type="text"] {
       padding: 10px;
-      font-size: 18px;
-      border: 1px solid #ccc;
+      width: 300px;
+      border: none;
       border-radius: 5px;
-      width: 100%;
+      font-size: 16px;
     }
     button {
-      padding: 10px;
-      font-size: 18px;
-      background-color: #007bff;
+      padding: 10px 15px;
+      margin-left: 10px;
+      font-size: 16px;
+      background-color: #1f1f1f;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #0056b3;
-    }
-    #results {
+    .results {
       margin-top: 20px;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
     }
     .result {
-      background: white;
+      margin-bottom: 15px;
       padding: 10px;
-      border-radius: 5px;
-      margin-top: 10px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      border-left: 4px solid #4caf50;
+      background-color: #1e1e1e;
     }
     .result a {
-      text-decoration: none;
-      color: #007bff;
+      color: #4caf50;
       font-weight: bold;
+      font-size: 18px;
+      text-decoration: none;
+    }
+    .result p {
+      margin: 5px 0 0;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <div id="sidebar">
-    <h3>Quick Link</h3>
-    <input type="text" id="linkInput" placeholder="Enter a full URL">
-    <button onclick="redirectToLink()">Go</button>
-
-    <h3 style="margin-top: 30px;">Bookmarks</h3>
-    <input type="text" id="bookmarkName" placeholder="Bookmark Name">
-    <input type="text" id="bookmarkUrl" placeholder="Bookmark URL">
-    <button onclick="addBookmark()">Add Bookmark</button>
-    <div id="bookmarks"></div>
-  </div>
-
-  <div id="main">
-    <div id="search-box">
-      <input type="text" id="query" placeholder="Search...">
-      <button onclick="searchWeb()">Search</button>
-    </div>
-    <div id="results"></div>
+  <div class="container">
+    <h1>Altpris Search</h1>
+    <input type="text" id="query" placeholder="Search for something..." />
+    <button onclick="search()">Search</button>
+    <div id="output"></div>
+    <div class="results" id="results"></div>
   </div>
 
   <script>
-    function redirectToLink() {
-      let url = document.getElementById('linkInput').value.trim();
-      if (!url) return;
-      if (!url.startsWith("http://") && !url.startsWith("https://")) {
-        url = "https://" + url;
-      }
-      window.location.href = url;
-    }
-
-    async function searchWeb() {
-      const query = document.getElementById('query').value;
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = '<em>Loading...</em>';
+    async function search() {
+      const query = document.getElementById("query").value;
+      const output = document.getElementById("output");
+      const results = document.getElementById("results");
+      output.innerText = `Sending request for: ${query}`;
+      results.innerHTML = '⏳ Loading...';
 
       try {
-        const response = await fetch('https://google-search122.p.rapidapi.com/', {
-          method: 'POST',
+        const response = await fetch("https://google-search122.p.rapidapi.com/", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'x-rapidapi-host': 'google-search122.p.rapidapi.com',
-            'x-rapidapi-key': 'f7e2ffa941msh8158f94506722bbp1b30f7jsnd8155d22d75f'
+            "Content-Type": "application/json",
+            "x-rapidapi-host": "google-search122.p.rapidapi.com",
+            "x-rapidapi-key": "f7e2ffa941msh8158f94506722bbp1b30f7jsnd8155d22d75f",
           },
           body: JSON.stringify({
-            actor: 'scraper.google.search',
+            actor: "scraper.google.search",
             input: {
               q: query,
-              hl: 'en',
-              gl: 'us'
-            }
-          })
+              hl: "en",
+              gl: "us",
+            },
+          }),
         });
 
         const data = await response.json();
-        resultsDiv.innerHTML = '<h4>Results:</h4>';
+        output.innerText = `✅ Response status: ${response.status}`;
 
-        if (data && data.output && Array.isArray(data.output)) {
-          data.output.forEach(result => {
-            const div = document.createElement('div');
-            div.className = 'result';
-            div.innerHTML = `
-              <a href="${result.link}" target="_blank">${result.title}</a>
-              <p>${result.snippet || ''}</p>
-            `;
-            resultsDiv.appendChild(div);
-          });
-        } else {
-          resultsDiv.innerHTML += '<p>No results found.</p>';
+        if (!data.organic || data.organic.length === 0) {
+          results.innerHTML = '<p>No results found</p>';
+          return;
         }
-      } catch (err) {
-        resultsDiv.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+
+        results.innerHTML = data.organic
+          .map(
+            (item) => `
+              <div class="result">
+                <a href="${item.link}" target="_blank">${item.title}</a>
+                <p>${item.snippet}</p>
+              </div>
+            `
+          )
+          .join("");
+      } catch (error) {
+        output.innerText = `❌ Error: ${error}`;
+        results.innerHTML = '';
       }
     }
-
-    function addBookmark() {
-      const name = document.getElementById('bookmarkName').value.trim();
-      let url = document.getElementById('bookmarkUrl').value.trim();
-      if (!name || !url) return;
-      if (!url.startsWith("http://") && !url.startsWith("https://")) {
-        url = "https://" + url;
-      }
-      const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
-      bookmarks.push({ name, url });
-      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-      displayBookmarks();
-      document.getElementById('bookmarkName').value = '';
-      document.getElementById('bookmarkUrl').value = '';
-    }
-
-    function deleteBookmark(index) {
-      const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
-      bookmarks.splice(index, 1);
-      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-      displayBookmarks();
-    }
-
-    function displayBookmarks() {
-      const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
-      const bookmarksDiv = document.getElementById('bookmarks');
-      bookmarksDiv.innerHTML = '';
-      bookmarks.forEach((bookmark, index) => {
-        const div = document.createElement('div');
-        div.className = 'bookmark';
-        div.innerHTML = `<a href="${bookmark.url}" target="_blank">${bookmark.name}</a> <button onclick="deleteBookmark(${index})">×</button>`;
-        bookmarksDiv.appendChild(div);
-      });
-    }
-
-    window.onload = displayBookmarks;
   </script>
 </body>
 </html>
