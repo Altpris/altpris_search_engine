@@ -2,33 +2,63 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Google Search API Tester</title>
+  <title>Search Engine</title>
   <style>
-    body { font-family: monospace; background: #111; color: #0f0; padding: 20px; }
-    #log { white-space: pre-wrap; background: #000; border: 1px solid #0f0; padding: 10px; margin-top: 10px; }
-    input, button { padding: 10px; font-size: 1rem; margin-right: 10px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      padding: 30px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 1rem;
+      margin-right: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    input {
+      width: 300px;
+    }
+    button {
+      background-color: #1e90ff;
+      color: white;
+      cursor: pointer;
+    }
+    .results {
+      margin-top: 30px;
+    }
+    .result {
+      margin-bottom: 20px;
+    }
+    .result a {
+      color: #1e90ff;
+      font-size: 1.1rem;
+      text-decoration: none;
+    }
+    .result p {
+      margin: 5px 0;
+      color: #ccc;
+    }
   </style>
 </head>
 <body>
   <h1>Search Something:</h1>
   <input type="text" id="searchInput" placeholder="Type anything..." />
   <button onclick="runRequest()">Search</button>
-  <div id="log">Ready when you are, chief.</div>
+
+  <div id="results" class="results"></div>
 
   <script>
-    function log(msg) {
-      const logDiv = document.getElementById("log");
-      logDiv.textContent += `\n${msg}`;
-    }
-
     async function runRequest() {
       const query = document.getElementById("searchInput").value.trim();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
       if (!query) {
-        log("⚠️ You didn't type anything.");
+        resultsDiv.innerHTML = "<p>Type something first 😤</p>";
         return;
       }
-
-      document.getElementById("log").textContent = "Sending request for: " + query;
 
       const endpoint = 'https://google-search122.p.rapidapi.com/';
       const headers = {
@@ -52,12 +82,32 @@
           body: JSON.stringify(body)
         });
 
-        log("\n✅ Response status: " + response.status);
-
         const data = await response.json();
-        log("\n🎯 Response:\n" + JSON.stringify(data, null, 2));
+
+        if (!data.organic || data.organic.length === 0) {
+          resultsDiv.innerHTML = "<p>No results found 😕</p>";
+          return;
+        }
+
+        data.organic.forEach(item => {
+          const resultDiv = document.createElement("div");
+          resultDiv.className = "result";
+
+          const title = document.createElement("a");
+          title.href = item.link;
+          title.target = "_blank";
+          title.textContent = item.title;
+
+          const snippet = document.createElement("p");
+          snippet.textContent = item.snippet;
+
+          resultDiv.appendChild(title);
+          resultDiv.appendChild(snippet);
+
+          resultsDiv.appendChild(resultDiv);
+        });
       } catch (error) {
-        log("\n❌ ERROR:\n" + error.toString());
+        resultsDiv.innerHTML = "<p>Error happened: " + error.toString() + "</p>";
       }
     }
   </script>
